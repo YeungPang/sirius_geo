@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:sirius_geo/builder/get_widget.dart';
 import 'package:badges/badges.dart';
