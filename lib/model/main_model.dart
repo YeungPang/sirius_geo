@@ -22,6 +22,7 @@ class MainModel extends BaseModel {
   Map<String, dynamic> fsm;
 
   List<Map<String, dynamic>> fsmList = [];
+  ValueNotifier<List<int>> progNoti;
 
   int _count = 0;
 
@@ -46,5 +47,9 @@ class MainModel extends BaseModel {
     if (designWidth > 0.0) {
       screenWRatio = screenWidth / designWidth;
     }
+    List<dynamic> ld = map["userProfile"]["progress"];
+    List<int> li = (ld == null) ? null : ld.map<int>((e) => e as int).toList();
+    progNoti = ValueNotifier<List<int>>(li);
+    stateData["progNoti"] = progNoti;
   }
 }

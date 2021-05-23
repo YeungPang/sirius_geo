@@ -6,7 +6,6 @@ import 'package:sirius_geo/controller/process_controller.dart';
 import 'package:sirius_geo/model/main_model.dart';
 import 'package:sirius_geo/locator.dart';
 import 'package:sirius_geo/controller/fsm_action.dart';
-import 'package:sirius_geo/resources/app_actions.dart';
 import 'dart:math';
 import 'package:sirius_geo/resources/basic_resources.dart';
 
@@ -685,46 +684,48 @@ handleList(
       dynamic l;
       switch (lt) {
         case "Widget":
-          List<Widget> lw = [];
-          for (int i = 0; i < list.length; i++) {
-            lw.add(list[i] as Widget);
-          }
-          l = lw;
+          // List<Widget> lw = [];
+          // for (int i = 0; i < list.length; i++) {
+          //   lw.add(list[i] as Widget);
+          // }
+          l = list.map<Widget>((e) => e as Widget).toList();
           break;
         case "String":
-          List<String> lw = [];
-          for (int i = 0; i < list.length; i++) {
-            lw.add(list[i] as String);
-          }
-          l = lw;
+          //List<String> lw =
+          // [];
+          // for (int i = 0; i < list.length; i++) {
+          //   lw.add(list[i] as String);
+          // }
+          l = list.map<String>((e) => e as String).toList();
           break;
         case "int":
-          List<int> lw = [];
-          for (int i = 0; i < list.length; i++) {
-            lw.add(list[i] as int);
-          }
-          l = lw;
+          //List<int> lw =
+          // List<int> lw = [];
+          // for (int i = 0; i < list.length; i++) {
+          //   lw.add(list[i] as int);
+          // }
+          l = list.map<int>((e) => e as int).toList();
           break;
         case "double":
-          List<double> lw = [];
-          for (int i = 0; i < list.length; i++) {
-            lw.add(list[i] as double);
-          }
-          l = lw;
+          // List<double> lw = [];
+          // for (int i = 0; i < list.length; i++) {
+          //   lw.add(list[i] as double);
+          // }
+          l = list.map<double>((e) => e as double).toList();
           break;
         case "bool":
-          List<bool> lw = [];
-          for (int i = 0; i < list.length; i++) {
-            lw.add(list[i] as bool);
-          }
-          l = lw;
+          // List<bool> lw = [];
+          // for (int i = 0; i < list.length; i++) {
+          //   lw.add(list[i] as bool);
+          // }
+          l = list.map<bool>((e) => e as bool).toList();
           break;
         default:
-          List<dynamic> lw = [];
-          for (int i = 0; i < list.length; i++) {
-            lw.add(list[i]);
-          }
-          l = lw;
+          // List<dynamic> lw = [];
+          // for (int i = 0; i < list.length; i++) {
+          //   lw.add(list[i]);
+          // }
+          l = list.map<dynamic>((e) => e).toList();
           break;
       }
       String key = parm["key"] as String;
@@ -818,15 +819,15 @@ valueNotify(
         (n is String) ? getSpecContent(n, map, model) : n;
     notifier.value = value;
   } else if (value is List<dynamic>) {
-    List<Widget> l = [];
-    for (var w in value) {
-      if (w is Widget) {
-        l.add(w);
-      }
-    }
+    //List<Widget> l =
+    // for (var w in value) {
+    //   if (w is Widget) {
+    //     l.add(w);
+    //   }
+    // }
     ValueNotifier<List<Widget>> notifier =
         (n is String) ? getSpecContent(n, map, model) : n;
-    notifier.value = l;
+    notifier.value = value.map<Widget>((e) => e as Widget).toList();
   }
 }
 

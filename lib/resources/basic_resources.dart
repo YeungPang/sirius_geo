@@ -65,10 +65,25 @@ const Widget space5 = SizedBox(
   width: 5,
 );
 
-final Gradient blueGradient = LinearGradient(
+final LinearGradient blueGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [Color(0xFF1785C1), Color(0xFF3BAEED)]);
+
+final LinearGradient greenGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF4DC591), Color(0xFF82EFC0)]);
+
+final LinearGradient redGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFF76F71), Color(0xFFFF9DAC)]);
+
+final LinearGradient orangeGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFFF9E50), Color(0xFFFDBD88)]);
 
 final BoxDecoration shadowRCDecoration = BoxDecoration(
   color: Colors.white,

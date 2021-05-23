@@ -3,7 +3,9 @@
     "mainView": "MainScaffold",
     "designHeight": 812.0,
     "designWidth": 375.0,
+    "totalProgNoti": 1,
     "text": {
+        "absSize": "Absolute size",
         "almost": "ALMOST",
         "answer": "ANSWER",
         "Answer": "Answer",
@@ -15,11 +17,14 @@
         "cities": "Cities",
         "congrat": "CONGRATUATIONS",
         "continents": "Continents",
+        "continentSize": "Continent Size",
         "corr": "CORRECT",
         "confirm": "CONFIRM",
         "countries": "Countries",
+        "countrySurface": "Countries Surface",
         "countryIs": "This country is #key#.",
         "done": "DONE",
+        "earthSurface%": "% of Earth Surface Area",
         "flags": "Flags",
         "forQuiz": "FOR THIS QUIZ!",
         "hemisphere": "Hemisphere",
@@ -31,6 +36,7 @@
         "journey": "TO LEARNING JOURNEY",
         "knowYourWorld": "Get to know your world!",
         "lakesInEurope": "Lakes in Europe",
+        "landSurface%": "% of Earth Land Surface Area",
         "largest": "Largest",
         "looseLife": "YOU LOST A LIFE.",
         "looseProgress": "All progress will be lost",
@@ -45,6 +51,7 @@
         "prevHint": "Previous Hint",
         "progress": "Progress",
         "qcontinents": "What continent is this?",
+        "qcontinentSize": "What is the size of #key# by surface area?",
         "qcountries": "What rank is #key# in surface area size order?",
         "quit": "QUIT",
         "quitText": "Are you sure you want to quit?",
@@ -55,6 +62,7 @@
         "showAnswer": "SHOW ANSWER",
         "smallest": "Smallest",
         "solarSys": "Solar System",
+        "areaSuffix": " Million km²",
         "topicSelection": "Topic Selection",
         "totalQ": "Total Questions",
         "tryAgain": "TRY AGAIN",
@@ -74,6 +82,9 @@
             "gameList": [
                 {
                     "key": "Africa",
+                    "surfaceSize": 30.37,
+                    "surfacePercent": 5.95,
+                    "landPercent": 20.31,
                     "imagePath": "assets/images/Africa.png",
                     "answerText": "This continent is Africa",
                     "hints": [
@@ -84,6 +95,9 @@
                 },
                 {
                     "key": "Antarctica",
+                    "surfaceSize": 14.2,
+                    "surfacePercent": 2.78,
+                    "landPercent": 9.49,
                     "imagePath": "assets/images/Antarctica.png",
                     "answerText": "This continent is Antarctica",
                     "hints": [
@@ -94,6 +108,9 @@
                 },
                 {
                     "key": "Asia",
+                    "surfaceSize": 44.58,
+                    "surfacePercent": 8.74,
+                    "landPercent": 29.80,
                     "imagePath": "assets/images/Asia.png",
                     "answerText": "This continent is Asia",
                     "hints": [
@@ -104,6 +121,9 @@
                 },
                 {
                     "key": "Australia",
+                    "surfaceSize": 7.69,
+                    "surfacePercent": 1.51,
+                    "landPercent": 5.14,
                     "imagePath": "assets/images/Australia.png",
                     "answerText": "This continent is Australia",
                     "hints": [
@@ -114,6 +134,9 @@
                 },
                 {
                     "key": "Europe",
+                    "surfaceSize": 10.18,
+                    "surfacePercent": 2.00,
+                    "landPercent": 6.81,
                     "imagePath": "assets/images/Europe.png",
                     "answerText": "This continent is Europe",
                     "hints": [
@@ -124,6 +147,9 @@
                 },
                 {
                     "key": "North America",
+                    "surfaceSize": 24.71,
+                    "surfacePercent": 4.84,
+                    "landPercent": 16.52,
                     "imagePath": "assets/images/NorthAmerica.png",
                     "answerText": "This continent is North America",
                     "hints": [
@@ -134,6 +160,9 @@
                 },
                 {
                     "key": "South America",
+                    "surfaceSize": 17.84,
+                    "surfacePercent": 3.50,
+                    "landPercent": 11.93,
                     "imagePath": "assets/images/SouthAmerica.png",
                     "answerText": "This continent is South America",
                     "hints": [
@@ -141,17 +170,6 @@
                         "Most people speak spanish.",
                         "This continent is South America."
                     ]
-                }
-            ]
-        },
-        "ContinentSize": {
-            "title": "Continent Size",
-            "gameList": [
-                {
-                    "key": "Asia",
-                    "surfaceSize": 44.58,
-                    "surfacePercent": 8.7,
-                    "landPercent": 29.0
                 }
             ]
         },
@@ -335,10 +353,22 @@
             "continents": {
                 "title": "/text/continents",
                 "icon": "continents",
+                "iconShift": -0.65,
+                "routePath": "GroupScaffold",
+                "fsmName": "GameBase",
+                "itemList": [
+                    "continentPick",
+                    "continentSize"
+                ]
+            },
+            "continentPick": {
+                "title": "/text/continents",
+                "icon": "continents",
                 "entity": "/entities/Continent",
                 "fsmName": "MultipleChoice",
                 "iconShift": -0.62,
                 "init": {
+                    "progId": 16,
                     "entity": "*/entity",
                     "size": 6,
                     "range": 7,
@@ -355,14 +385,93 @@
                     }
                 }
             },
+            "continentSize": {
+                "title": "/text/continentSize",
+                "icon": "continents",
+                "entity": "/entities/Continent",
+                "fsmName": "ThreeSlider",
+                "iconShift": -0.62,
+                "init": {
+                    "progId": 32,
+                    "entity": "*/entity",
+                    "questionText": "/text/qcontinentSize",
+                    "progress": [
+                        -1,
+                        -1,
+                        -1
+                    ],
+                    "scale1": "surfaceSize",
+                    "scale2": "surfacePercent",
+                    "scale3": "landPercent",
+                    "text1": "/text/absSize",
+                    "text2": "/text/earthSurface%",
+                    "text3": "/text/landSurface%",
+                    "suffix1": "/text/areaSuffix",
+                    "suffix2": "%",
+                    "suffix3": "%",
+                    "start1": 0.0,
+                    "start2": 0.0,
+                    "start3": 0.0,
+                    "end1": 50.0,
+                    "end2": 100.0,
+                    "end3": 100.0,
+                    "ratio12": 0.19604,
+                    "ratio13": 0.66858,
+                    "yourSel": "/text/yourSel",
+                    "corrDesc": {
+                        "title": "/text/amazing",
+                        "subTitle": "/text/accuracy",
+                        "decoration": "^/corrBannerDec",
+                        "btn": "nextBtn",
+                        "height": 125.0
+                    },
+                    "almostDesc": {
+                        "title": "/text/almost",
+                        "subTitle": "/text/accuracy",
+                        "resultText": "/text/wontLoose",
+                        "decoration": "^/almostBannerDec",
+                        "btn": [
+                            "ansBtn",
+                            "tryAgainBtn"
+                        ],
+                        "height": 125.0
+                    },
+                    "failDesc": {
+                        "title": "/text/notQuite",
+                        "subTitle": "/text/accuracy",
+                        "resultText": "/text/wontLoose",
+                        "decoration": "^/incorrBannerDec",
+                        "btn": [
+                            "ansBtn",
+                            "tryAgainBtn"
+                        ],
+                        "height": 125.0
+                    },
+                    "failAnswerDesc": {
+                        "title": "/text/notQuite",
+                        "subTitle": "/text/accuracy",
+                        "decoration": "^/incorrBannerDec",
+                        "btn": "nextBtn",
+                        "height": 125.0
+                    },
+                    "almostAnswerDesc": {
+                        "title": "/text/almost",
+                        "subTitle": "/text/accuracy",
+                        "decoration": "^/almostBannerDec",
+                        "btn": "nextBtn",
+                        "height": 125.0
+                    }
+                }
+            },
             "countries": {
-                "title": "/text/countries",
+                "title": "/text/countrySurface",
                 "icon": "countries",
                 "entity": "/entities/Countries",
                 "fsmName": "VSlider",
                 "ansTxt": "/text/countryIs",
                 "iconShift": -0.62,
                 "init": {
+                    "progId": 64,
                     "entity": "*/entity",
                     "corrText": "/text/amazing",
                     "scoreText": "/text/accuracy",
@@ -777,6 +886,128 @@
                             "index": "*/index",
                             "list": "°/list",
                             "type": "get"
+                        }
+                    }
+                }
+            }
+        },
+        "ThreeSlider": {
+            "patterns": [
+                "GamePat"
+            ],
+            "init": {
+                "done": [],
+                "actions": {
+                    "handleList": {
+                        "key": "°/range",
+                        "type": "length",
+                        "list": "*/entity/gameList"
+                    }
+                }
+            },
+            "corrText": "/text/amazing",
+            "scoreText": "/text/accuracy",
+            "almostPer": 10.0,
+            "corrPer": 5.0,
+            "bheight": 200.0,
+            "*": {
+                "newGame": {
+                    "newState": "start",
+                    "actions": {
+                        "getRandom": {
+                            "key": "item",
+                            "exclude": "°/done",
+                            "range": "°/range"
+                        },
+                        "handleList": [
+                            {
+                                "key": "gameItem",
+                                "index": "*/item",
+                                "list": "°/entity/gameList",
+                                "type": "get"
+                            },
+                            {
+                                "list": "°/done",
+                                "type": "add",
+                                "value": "*/item"
+                            }
+                        ],
+                        "setContent": [
+                            {
+                                "key": "°/game",
+                                "content": "*/gameItem"
+                            },
+                            {
+                                "key": "°/question",
+                                "content": "°/questionText"
+                            }
+                        ],
+                        "replaceText": {
+                            "key": "°/question",
+                            "replace": "#key#",
+                            "by": "*/gameItem/key"
+                        }
+                    }
+                },
+                "buildUp": {
+                    "actions": {
+                        "buildSlider": {
+                            "key": "slider"
+                        },
+                        "build": {
+                            "key": "children",
+                            "builder": [
+                                "question",
+                                "GameConfirm"
+                            ]
+                        },
+                        "handleList": {
+                            "list": "*/children",
+                            "index": 1,
+                            "type": "insertAt",
+                            "value": "*/slider"
+                        },
+                        "setProgRow": {
+                            "mode": "first"
+                        }
+                    }
+                }
+            },
+            "edited": {
+                "confirm": {
+                    "newState": "confirmed",
+                    "actions": {
+                        "threeSliderAnswer": {}
+                    }
+                }
+            },
+            "confirmed": {
+                "tryAgain": {
+                    "actions": {
+                        "setProgRow": {
+                            "mode": "repeat"
+                        },
+                        "closeResultDialog": {},
+                        "valueNotify": [
+                            {
+                                "value": 0,
+                                "notifier": "°/sliderNoti"
+                            },
+                            {
+                                "notifier": "°/confirmNoti",
+                                "value": 0.5
+                            },
+                            {
+                                "value": "°/stackList",
+                                "notifier": "°/stackListNoti"
+                            }
+                        ]
+                    }
+                },
+                "answer": {
+                    "actions": {
+                        "sliderShowAnswer": {
+                            "type": "horizontal"
                         }
                     }
                 }
@@ -1722,7 +1953,7 @@
                 "elevation": 4.0,
                 "cardRadius": 20.0,
                 "height": 70.0,
-                "width": 120.0,
+                "width": 170.0,
                 "margin": {
                     "top": 10.0
                 },
@@ -1977,7 +2208,8 @@
             ],
             "elements": {
                 "onTap": {
-                    "popRoute": {}
+                    "popRoute": {},
+                    "progNotify": {}
                 }
             },
             "builder": {
@@ -2549,6 +2781,14 @@
             },
             "builder": "Container"
         },
+        "GroupScaffold": {
+            "patterns": [
+                "ScaffoldPat"
+            ],
+            "actions": {
+                "getGroupBody": {}
+            }
+        },
         "TopicButtons": {
             "patterns": [
                 "ResultContainer"
@@ -2647,18 +2887,16 @@
                 "name": "Container",
                 "child": {
                     "elements": {
-                        "mainAxisAlignment": "spaceAround",
+                        "alignment": "center",
                         "wrapper": "ClipRRect",
                         "borderRadius": {
                             "radius": 24,
                             "type": "circular"
-                        }
+                        },
+                        "child": "*/topicDialogChild"
                     },
                     "builder": {
-                        "name": "Column",
-                        "children": [
-                            "JourneyButton"
-                        ]
+                        "name": "Container"
                     }
                 }
             }
@@ -2779,14 +3017,16 @@
                 }
             },
             "widgets": {
+                "topicDialogChild": "JourneyButton",
                 "child": {
                     "elements": {
+                        "wrapper": "ValueTypeListener",
+                        "notifier": "^/progNoti",
                         "crossAxisAlignment": "center",
                         "mainAxisAlignment": "spaceBetween",
                         "mainAxisSize": "max"
                     },
                     "actions": {
-                        "topicWidget": "topicWidget",
                         "initFSM": {
                             "fsmName": "GameBase"
                         }
@@ -2802,19 +3042,7 @@
             },
             "builder": "Container"
         },
-        "MainScaffold": {
-            "actions": {
-                "convert": {
-                    "key": "lives",
-                    "type": "String",
-                    "value": "/userProfile/lives"
-                },
-                "createNotifier": {
-                    "key": "^/livesNoti",
-                    "value": "*/lives",
-                    "type": "String"
-                }
-            },
+        "ScaffoldPat": {
             "elements": {
                 "color": "#FFFFFF",
                 "appTitle": "/title"
@@ -2833,12 +3061,44 @@
                 }
             },
             "builder": {
-                "name": "Scaffold",
+                "name": "Scaffold"
+            }
+        },
+        "MainScaffold": {
+            "patterns": [
+                "ScaffoldPat"
+            ],
+            "patOrder": "aewb",
+            "actions": {
+                "convert": {
+                    "key": "lives",
+                    "type": "String",
+                    "value": "/userProfile/lives"
+                },
+                "createNotifier": {
+                    "key": "^/livesNoti",
+                    "value": "*/lives",
+                    "type": "String"
+                }
+            },
+            "builder": {
                 "body": "MainBody"
             }
         }
     },
     "userProfile": {
-        "lives": 5
+        "lives": 5,
+        "progress": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ]
     }
 }

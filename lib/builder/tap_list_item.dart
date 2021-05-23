@@ -31,7 +31,9 @@ class TapListItem extends StatelessWidget {
     );
     return GridView.builder(
       gridDelegate: gd,
+      scrollDirection: map["direction"] ?? Axis.vertical,
       padding: map["padding"] ?? null,
+      physics: map["physics"],
       shrinkWrap: true,
       itemCount: itemRef.length,
       itemBuilder: (context, index) => _itemBuilder(itemRef[index], index),

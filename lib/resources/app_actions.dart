@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:sirius_geo/builder/abstraction.dart';
 import 'package:sirius_geo/builder/comp_builder.dart';
+import 'package:sirius_geo/builder/value_listener.dart';
 import 'package:sirius_geo/locator.dart';
 import 'package:sirius_geo/model/main_model.dart';
 import 'package:sirius_geo/controller/process_controller.dart';
@@ -39,14 +40,17 @@ const Map<String, Function> appActions = {
   "getBaseNaviRow": getBaseNaviRow,
   "getCatView": getCatView,
   "getBottomRow": getBottomRow,
+  "getGroupBody": getGroupBody,
   "getQuitDialog": getQuitDialog,
-  "invokeGame": invokeGame,
   "multiAnswer": multiAnswer,
+  "progNotify": progNotify,
   "repeatGame": repeatGame,
+  "routing": routing,
   "setHint": setHint,
   "setProgRow": setProgRow,
   "showAnswer": showAnswer,
   "sliderShowAnswer": sliderShowAnswer,
+  "threeSliderAnswer": threeSliderAnswer,
   "vSliderAnswer": vSliderAnswer,
 };
 
@@ -262,8 +266,8 @@ buildSlider(
       nmap[st] = map[st];
     }
   }
+  fsm["sliderNoti"] = ValueNotifier<int>(0);
   if (type == "vertical") {
-    fsm["sliderNoti"] = ValueNotifier<int>(0);
     fsm["scaleNoti"] = ValueNotifier<double>(50.0);
     map[key] = Container(
         margin: catIconPadding,
@@ -272,9 +276,9 @@ buildSlider(
         alignment: Alignment.center,
         child: VertSlider(nmap, fsm));
   } else {
-    nmap["totalArea"] = fsm["totalArea"];
-    nmap["totalLand"] = fsm["totalLand"];
-    map[key] = SliderWidget(nmap);
+    nmap["height"] = 812.0 * model.screenHRatio;
+    nmap["width"] = 375.0 * model.screenWRatio;
+    map[key] = ThreeSliderWidget(nmap, fsm);
   }
 }
 
@@ -592,6 +596,12 @@ gameComplete(
         ),
       ];
     }
+    int p = fsm["progId"];
+    List<int> pl = model.progNoti.value;
+    int n = p & 15;
+    pl[n] |= p;
+    model.map["userProfile"]["progress"] = pl;
+    //model.progNoti.value = pl;
   } else {
     sts = sts.copyWith(color: Color(0xFFF76F71));
     bts = bts.copyWith(color: Color(0xFFF76F71));
@@ -748,6 +758,7 @@ _notifyStack(List<Widget> stackList, ProcessController controller,
 
 getBaseNaviRow(
     Map<String, dynamic> parm, MainModel model, ProcessController controller) {
+  print("getBaseNaviRow");
   Map<String, dynamic> map = parm["map"] as Map<String, dynamic>;
   Map<String, dynamic> fsm = model.fsm;
   String iName = controller.getContent("*/item", map);
@@ -788,7 +799,7 @@ getBaseNaviRow(
       "wrapper": "WrappedContainer",
       "alignment": Alignment.centerLeft,
       "itemRef": item["itemList"],
-      "onTap": {"invokeGame": {}},
+      "onTap": {"routing": {}},
       "child": "CatCol",
       "direction": "horizontal",
       "physics": clampingScrollPhysics,
@@ -821,20 +832,92 @@ getCatView(
   if (a != null) {
     al = Alignment(a, 0.0);
   }
-
-  Widget icon = Icon(myIcons[s], size: 45, color: Color(0xFF1785C1));
+  double hc = model.screenHRatio * 100.0;
+  double w = model.screenWRatio * 80.0;
   Map<String, dynamic> iMap = {
     "elements": {
       "boxDecoration": "^/shadowDecoration",
       "alignment": al ?? Alignment.center,
-      "height": model.screenHRatio * 80.0,
-      "width": model.screenWRatio * 80.0,
-      "child": icon
+      "height": hc,
+      "width": w,
+      "child": Icon(myIcons[s],
+          size: model.screenWRatio * 45, color: Color(0xFF1785C1))
     },
     "builder": "Container"
   };
+  Widget ic = _buildWidget(iMap, map);
+
+  List<dynamic> il = item["itemList"];
+  double h = model.screenWRatio * 17.0;
+  if (il == null) {
+    bool b = (item["init"] == null)
+        ? false
+        : _checkProgress(item["init"]["progId"], model.progNoti.value);
+    if (b) {
+      Widget pi = Positioned(
+        top: hc * 0.70,
+        left: w * 0.70,
+        child: Icon(myIcons["correct"], size: h, color: Color(0xFF4DC591)),
+      );
+      ic = Stack(
+        alignment: Alignment.center,
+        children: [ic, pi],
+      );
+    }
+  } else {
+    int i = 0;
+    for (var s in il) {
+      Map<String, dynamic> itm = fsm[s as String];
+      bool bi = (itm["init"] == null)
+          ? false
+          : _checkProgress(itm["init"]["progId"], model.progNoti.value);
+      if (bi) {
+        i++;
+      }
+    }
+    double hp = 15 * model.screenHRatio;
+    bool full = (i == il.length);
+    Widget pi = (i == 0)
+        ? null
+        : Container(
+            width: full ? w : w * i / il.length,
+            height: hp,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10)),
+              gradient: greenGradient,
+            ));
+
+    Widget pc = Positioned(
+        top: hc * 0.85,
+        left: 0.0,
+        child: (i == 0)
+            ? Container(
+                width: w,
+                height: hp,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                        bottomRight: Radius.circular(10),
+                        bottomLeft: Radius.circular(10)),
+                    border: Border.all(color: colorMap["correct"], width: 1)),
+              )
+            : Container(
+                alignment: Alignment.centerLeft,
+                width: w,
+                height: hp,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                        bottomRight: Radius.circular(10),
+                        bottomLeft: Radius.circular(10)),
+                    border: Border.all(color: colorMap["correct"], width: 1)),
+                child: pi,
+              ));
+    ic = Stack(
+      alignment: Alignment.center,
+      children: [ic, pc],
+    );
+  }
   map["children"] = [
-    _buildWidget(iMap, map),
+    ic,
     SizedBox(
       height: 2,
     ),
@@ -842,20 +925,24 @@ getCatView(
   ];
 }
 
-invokeGame(
+routing(
     Map<String, dynamic> parm, MainModel model, ProcessController controller) {
   Map<String, dynamic> map = parm["map"] as Map<String, dynamic>;
   Map<String, dynamic> fsm = model.fsm;
   String iName = controller.getContent("*/item", map);
   Map<String, dynamic> item = fsm[iName];
   String fsmName = item["fsmName"];
+  String routePath = item["routePath"] ?? "GameScaffold";
   if (fsmName != null) {
     Map<String, dynamic> actions = {
       "pushFSM": {},
       "initFSM": {"fsmName": fsmName},
-      "route": {"path": "GameScaffold"}
+      "route": {"path": routePath}
     };
-    map["entity"] = controller.getContent(item["entity"], map);
+    String entity = item["entity"];
+    if (entity != null) {
+      map["entity"] = controller.getContent(item["entity"], map);
+    }
     map["fsmName"] = fsmName;
     controller.performActions(actions, map);
   }
@@ -1000,6 +1087,73 @@ vSliderAnswer(
   }
 }
 
+threeSliderAnswer(
+    Map<String, dynamic> parm, MainModel model, ProcessController controller) {
+  Map<String, dynamic> map = parm["map"] as Map<String, dynamic>;
+  Map<String, dynamic> fsm = model.fsm;
+  Map<String, dynamic> item = controller.getContent("*/gameItem", map);
+  String scale = fsm["scale1"];
+  double ans1 = item[scale];
+  fsm["ans1"] = ans1;
+  scale = fsm["scale2"];
+  fsm["ans2"] = item[scale];
+  scale = fsm["scale3"];
+  fsm["ans3"] = item[scale];
+  double per = ((ans1 - fsm["in1"]) / ans1 * 100.00).abs();
+  ValueNotifier<int> vn = fsm["sliderNoti"];
+  fsm["A%"] = per.toStringAsFixed(2);
+  if (per <= fsm["corrPer"]) {
+    fsm["resStatus"] = "g";
+    Map<String, dynamic> actions = {
+      "setProgRow": {"mode": "success"},
+      "buildResultDialog": {"resultDesc": "corrDesc"}
+    };
+    Map<String, dynamic> nparm = {"type": "horizontal"};
+    buildSliderResult(nparm, model, controller);
+    vn.value = 1;
+    controller.performActions(actions, map);
+  } else {
+    if (per <= fsm["almostPer"]) {
+      fsm["resStatus"] = "o";
+      Map<String, dynamic> actions = {
+        "setProgRow": {"mode": "success"},
+        "buildResultDialog": {"resultDesc": "almostDesc"}
+      };
+      vn.value = 2;
+      controller.performActions(actions, map);
+    } else {
+      int lives = controller.getContent("/userProfile/lives", map);
+      fsm["resStatus"] = "r";
+      Map<String, dynamic> actions = {
+        "setProgRow": {"mode": "fail"},
+        "buildResultDialog": {"resultDesc": "failDesc"}
+      };
+      List<dynamic> l = fsm["progress"];
+      bool notRepeat = true;
+      int i = 0;
+      while (notRepeat && (i < l.length) && (l[i] != -1)) {
+        if (l[i] > 1) {
+          notRepeat = false;
+        } else {
+          i++;
+        }
+      }
+      if ((lives > 0) && (notRepeat)) {
+        lives--;
+        actions = {
+          "setProgRow": {"mode": "fail"},
+          "buildResultDialog": {"resultDesc": "lifeDesc"},
+          "setContent": {"key": "/userProfile/lives", "content": lives}
+        };
+        ValueNotifier<String> ln = controller.getContent("^/livesNoti", map);
+        ln.value = lives.toString();
+      }
+      vn.value = 2;
+      controller.performActions(actions, map);
+    }
+  }
+}
+
 showAnswer(
     Map<String, dynamic> parm, MainModel model, ProcessController controller) {
   Map<String, dynamic> map = parm["map"] as Map<String, dynamic>;
@@ -1013,17 +1167,22 @@ sliderShowAnswer(
   Map<String, dynamic> map = parm["map"] as Map<String, dynamic>;
   Map<String, dynamic> fsm = model.fsm;
   closeResultDialog(parm, model, controller);
-  Map<String, dynamic> actions = {
-    "buildSliderResult": {},
-  };
+  String type = parm["type"];
+  Map<String, dynamic> actions = (type == null)
+      ? {
+          "buildSliderResult": {},
+        }
+      : {
+          "buildSliderResult": {"type": type},
+        };
   if (fsm["resStatus"] == "o") {
     actions["buildResultDialog"] = {"resultDesc": "almostAnswerDesc"};
   } else {
     actions["buildResultDialog"] = {"resultDesc": "failAnswerDesc"};
   }
+  controller.performActions(actions, map);
   ValueNotifier<int> vn = fsm["sliderNoti"];
   vn.value = 1;
-  controller.performActions(actions, map);
 }
 
 buildResultDialog(
@@ -1160,6 +1319,7 @@ buildSliderResult(
     Map<String, dynamic> parm, MainModel model, ProcessController controller) {
   Map<String, dynamic> map = parm["map"] as Map<String, dynamic>;
   Map<String, dynamic> fsm = model.fsm;
+  bool isVert = (parm["type"] == "horizontal") ? false : true;
   Color c = (fsm["resStatus"] == "g")
       ? colorMap["correct"]
       : (fsm["resStatus"] == "o")
@@ -1167,6 +1327,23 @@ buildSliderResult(
           : colorMap["incorrect"];
   TextStyle ts = SliderTextStyle.copyWith(color: c);
   TextStyle ts1 = ComplTextStyle.copyWith(color: c);
+  List<Widget> wl = isVert
+      ? [
+          Text(
+            fsm["scale1"],
+            style: ts,
+          ),
+          Text(
+            fsm["ans1"].toString(),
+            style: ts1,
+          ),
+        ]
+      : [
+          Text(
+            fsm["ans1"].toString() + fsm["suffix1"],
+            style: ts,
+          ),
+        ];
   Map<String, dynamic> m1 = {
     "parent": map,
     "resColor": c,
@@ -1177,79 +1354,110 @@ buildSliderResult(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           mainAxisSize: MainAxisSize.max,
-          children: [
-            Text(
-              fsm["scale1"],
-              style: ts,
-            ),
-            Text(
-              fsm["ans1"].toString(),
-              style: ts1,
-            ),
-          ],
+          children: wl,
         ))
   };
-  Map<String, dynamic> m2 = {
-    "parent": map,
-    "resColor": c,
-    "resCol": Container(
+  Widget w1 = _buildWidget("VSliderResValue", m1);
+  wl = isVert
+      ? [
+          Text(
+            fsm["scale2"],
+            style: ts,
+          ),
+          Text(
+            fsm["ans2"].toString(),
+            style: ts1,
+          ),
+        ]
+      : [
+          Text(
+            fsm["ans2"].toString() + fsm["suffix2"],
+            style: ts,
+          ),
+        ];
+  m1["resCol"] = Container(
+      alignment: Alignment.centerLeft,
+      margin: EdgeInsets.only(left: 18.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisSize: MainAxisSize.max,
+        children: wl,
+      ));
+  Widget w2 = _buildWidget("VSliderResValue", m1);
+  Widget ansC = Container(
+    width: 60.0,
+    height: 16.0,
+    //margin: EdgeInsets.only(left: 15.0),
+    color: Colors.white,
+    alignment: Alignment(-0.9, 0.0),
+    child: Text(
+      controller.getContent("/text/Answer", map),
+      style: ts,
+    ),
+  );
+
+  if (isVert) {
+    Widget ansW = Align(alignment: Alignment(-0.2, 1.0), child: ansC);
+    Widget w = Align(
+        alignment: Alignment(1.0, 0.0),
+        child: Container(
+            width: 50.0 * model.screenWRatio,
+            height: 170.0 * model.screenHRatio,
+            child: OverflowBox(
+                maxWidth: 160.0,
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Stack(
+                        alignment: Alignment.topLeft,
+                        children: [SizedBox(height: 60.0), w2, ansW],
+                      ),
+                      Stack(
+                          alignment: Alignment.topLeft,
+                          children: [SizedBox(height: 60.0), w1, ansW])
+                    ]))));
+    List<Widget> stackList = fsm["stackList"];
+    stackList.add(w);
+  } else {
+    Widget ansW = Align(alignment: Alignment(-0.3, -1.0), child: ansC);
+    fsm["res1"] = Container(
+        width: 80.0 * model.screenWRatio,
+        height: 60.0 * model.screenHRatio,
+        child: OverflowBox(
+            maxWidth: 180.0,
+            child: Stack(alignment: Alignment.topLeft, children: [w1, ansW])));
+    fsm["res2"] = Container(
+        width: 80.0 * model.screenWRatio,
+        height: 60.0 * model.screenHRatio,
+        child: OverflowBox(
+            maxWidth: 180.0,
+            child: Stack(alignment: Alignment.topLeft, children: [w2, ansW])));
+    wl = [
+      Text(
+        fsm["ans3"].toString() + fsm["suffix3"],
+        style: ts,
+      ),
+    ];
+    m1["resCol"] = Container(
         alignment: Alignment.centerLeft,
         margin: EdgeInsets.only(left: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           mainAxisSize: MainAxisSize.max,
-          children: [
-            Text(
-              fsm["scale2"],
-              style: ts,
-            ),
-            Text(
-              fsm["ans2"].toString(),
-              style: ts1,
-            ),
-          ],
-        ))
-  };
-  Widget ansW = Align(
-      alignment: Alignment(-0.2, 1.0),
-      child: Container(
-        width: 60.0,
-        //margin: EdgeInsets.only(left: 15.0),
-        color: Colors.white,
-        alignment: Alignment(-0.9, 0.0),
-        child: Text(
-          controller.getContent("/text/Answer", map),
-          style: ts,
-        ),
-      ));
-  Widget w = Align(
-      alignment: Alignment(1.0, 0.0),
-      child: Container(
-          width: 50.0 * model.screenWRatio,
-          height: 170.0 * model.screenHRatio,
-          child: OverflowBox(
-              maxWidth: 160.0,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Stack(
-                      alignment: Alignment.topLeft,
-                      children: [
-                        SizedBox(height: 60.0),
-                        _buildWidget("VSliderResValue", m2),
-                        ansW
-                      ],
-                    ),
-                    Stack(alignment: Alignment.topLeft, children: [
-                      SizedBox(height: 60.0),
-                      _buildWidget("VSliderResValue", m1),
-                      ansW
-                    ])
-                  ]))));
-  List<Widget> stackList = fsm["stackList"];
-  stackList.add(w);
+          children: wl,
+        ));
+    fsm["res3"] = Container(
+        width: 80.0 * model.screenWRatio,
+        height: 60.0 * model.screenHRatio,
+        child: OverflowBox(
+            maxWidth: 180.0,
+            child: Stack(
+                alignment: Alignment.topLeft,
+                children: [_buildWidget("VSliderResValue", m1), ansW])));
+  }
 }
 
 closeResultDialog(
@@ -1260,4 +1468,74 @@ closeResultDialog(
   while (stackList.length > stackLength) {
     stackList.removeLast();
   }
+}
+
+getGroupBody(
+    Map<String, dynamic> parm, MainModel model, ProcessController controller) {
+  Map<String, dynamic> map = parm["map"] as Map<String, dynamic>;
+  Map<String, dynamic> fsm = model.fsm;
+  String iName = controller.getContent("*/item", map);
+  Map<String, dynamic> item = fsm[iName];
+  String title = controller.getContent(item["title"], map);
+  Widget tc = Text(
+    title,
+    style: QuestionTextStyle,
+  );
+  Map<String, dynamic> cMap = {
+    "elements": {
+      "bheight": 400.0,
+      "height": model.screenHRatio * 240.0,
+      "wrapper": "WrappedContainer",
+      "alignment": Alignment.centerLeft,
+      "crossAxisCount": 3,
+      "itemRef": item["itemList"],
+      "onTap": {"routing": {}},
+      "child": "CatCol",
+      "physics": clampingScrollPhysics,
+    },
+    "builder": {"name": "TapListItem"}
+  };
+  Map<String, dynamic> nmap = {"parent": map, "topicDialogChild": tc};
+  Map<String, dynamic> bodySpec = {
+    "elements": {"color": "#FFFFFF", "alignment": "topCenter"},
+    "widgets": {
+      "child": {
+        "elements": {
+          "crossAxisAlignment": "center",
+          "mainAxisAlignment": "spaceBetween",
+          "mainAxisSize": "max",
+          "children": [
+            _buildWidget("TopicContainer", nmap),
+            ValueListenableBuilder<List<int>>(
+              valueListenable: model.progNoti,
+              builder: (BuildContext context, List<int> value, Widget child) =>
+                  _buildWidget(cMap, map),
+            )
+          ]
+        },
+        "builder": {"name": "ListView"}
+      }
+    },
+    "builder": "Container"
+  };
+
+  map["body"] = _buildWidget(bodySpec, map);
+}
+
+bool _checkProgress(int p, List<int> prog) {
+  if ((p == null) || (prog == null)) {
+    return false;
+  }
+  int n = p & 15;
+  if (n >= prog.length) {
+    return null;
+  }
+  return p == prog[n] & p;
+}
+
+progNotify(
+    Map<String, dynamic> parm, MainModel model, ProcessController controller) {
+  List<int> pn =
+      model.map["userProfile"]["progress"].map<int>((e) => e as int).toList();
+  model.progNoti.value = pn;
 }

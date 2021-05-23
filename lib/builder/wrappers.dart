@@ -96,6 +96,8 @@ Widget getValueTypeListener(Map<String, dynamic> map) {
     return ValueTypeListener<double>(map);
   } else if (value is bool) {
     return ValueTypeListener<bool>(map);
+  } else if (value is List<int>) {
+    return ValueTypeListener<List<int>>(map);
   }
   return null;
 }
